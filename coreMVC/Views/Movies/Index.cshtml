@@ -1,0 +1,108 @@
+﻿@model IEnumerable<Movie>
+@{
+    ViewData["Title"] = "Movie";
+}
+<div style="width:800px;margin: 50px auto;">
+<i class="bi bi-film"></i>
+<h2 class="d-inline"> @ViewData["Title"]</h2>
+<hr />
+
+<a class="btn btn-primary" asp-action="Create"><i class="bi bi-plus"></i>  Add New Movie</a>
+
+<div class="mt-4"></div>
+    @if (!Model.Any())
+    {
+        <div class="alert alert-warning" role="alert">
+            <i class="bi bi-exclamation-triangle"></i> No Movies For Show..!
+        </div>
+    }
+    else
+    {
+        <div class="row">
+            <div class="col-md-12">
+            @foreach(var item in Model)
+            {
+                
+                <div class="card mb-3">
+                    <div class="row g-0">
+                        <div class="col-md-3 poster"style="background-image:url(data:image\/*;base64,@(Convert.ToBase64String(item.Poster)));background-size:100% 100%"></div>
+                        <div class="col-md-9 text">
+                            <div class="card-body">
+                                <div>
+                                    <h5 class="card-title">@item.Title (@item.Year)</h5>
+                                        <span class="ind-genre">@item.Genre.Name</span>
+                                    <p class="card-text ">@(item.Storyline.Length > 150 ?$"{item.Storyline.Substring(0,150)} ..." :item.Storyline)</p>
+                                </div>
+                                <div class="d-flex justify-content-between">
+                                    <p class="card-text mb-0 mt-3">
+                                        <small class="text-muted"><i class="Bi bi-star-fill text-warning"></i> @item.Rate.ToString("0.0")</small>
+                                    </p>
+                                    <div class=" gap-1">
+                                        <a asp-action="Details" asp-route-id="@item.ID" class="btn btn-outline-secondary">
+                                            <i class="Bi bi-camera-reels"></i> Details
+                                        </a>
+
+                                        <a asp-action="Edit" asp-route-id="@item.ID" class="btn btn-outline-success">
+                                            <i class="Bi bi-pencil"></i> Edit
+                                        </a>
+
+                                        <a href="javascript:;" class="btn btn-danger js-delete" data-id="@item.ID">
+                                            <i class="Bi bi-trash"></i> Delete
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+            </div>
+        </div>
+
+    }
+
+</div>
+
+@section Scripts{
+    <script>
+        $(document).ready(function(){
+            $(".js-delete").on("click",function(){
+                var btn = $(this);
+                //console.log(btn.data('id'));
+                var result = bootbox.confirm({
+                    title: 'Delete Movie?',
+                    message: 'Are U Sure That You Wanna Delete This?',
+                    buttons: {
+                        confirm: {
+                            label: 'Yes',
+                            className: 'btn-danger'
+                        },
+                        cancel: {
+                            label: 'No',
+                            className: 'btn-outline-secondary'
+                        }
+                    },
+                    callback: function (result) {
+                        if (result) {
+                            $.ajax({
+                                url: '/movies/delete/' + btn.data('id'),
+                                success: function () {
+                                    btn.parents('.card').addClass("animate__animated animate__zoomOut");
+                                    setTimeout(function(){
+                                        btn.parents('.card').remove();
+                                    },900);
+                                    toasrt.success('Movie Deleted');
+                                },
+                                error: function () {
+                                    toastr.error('something is wrong.!')
+                                }
+                            })
+                        }
+                    }
+                });
+                //console.log(result);
+                
+            });
+        });
+    </script>
+}
